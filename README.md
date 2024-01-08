@@ -1,2 +1,2 @@
-# post-install
-Pop!OS post-install
+# Pos-install
+Pop!OS Pos-install
