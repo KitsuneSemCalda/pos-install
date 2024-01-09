@@ -26,7 +26,8 @@ removing_list=(
 )
 
 utilitaries_app=(
-    deb-orphan
+    deborphan
+    numlockx
     zram-config
     tldr
     folder-color
@@ -40,17 +41,6 @@ utilitaries_app=(
     irqbalance
     scrcpy
     systemd-oomd
-)
-
-local virtual_machine_app=(
-    virtualbox-guest-additions-iso
-    virtualbox-guest-utils
-    virtualbox-guest-utils-hwe
-    virtualbox-guest-x11
-    virtualbox-guest-x11-hwe
-
-    xserver-xorg-input-evdev
-    xserver-xorg-video-vmware
 )
 
 # Setting auxiliar functions
@@ -118,11 +108,11 @@ print_red() {
 
 print_green "[Update Certificates]"
 
-sudo update-ca-certificates 2&> /dev/null
+sudo update-ca-certificates
 
 print_green "[Adding graphics-drivers PPA]"
 
-sudo add-apt-repository ppa:oibaf/graphics-drivers -y 2&> /dev/null
+sudo add-apt-repository ppa:oibaf/graphics-drivers -y
 
 flatpak remote-add --if-not-exists --no-gpg-verify flathub https://flathub.org/repo/flathub.flatpakrepo
 
@@ -130,41 +120,45 @@ sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo flatp
 
 # Setting the hostname
 print_green "[Setting the hostname to ${HOSTNAME}]"
-hostnamectl set-hostname "${HOSTNAME}" 2&> /dev/null
+hostnamectl set-hostname "${HOSTNAME}"
 
 # Configure the firewall
 print_green "[Setting the firewall]"
-sudo ufw enable 2&> /dev/null
+sudo ufw enable
 
 # Configure mirror speed
 print_green "[Setting Mirrors from Brazil]"
-sudo sed -i 's|http://us.|http://br.|' /etc/apt/sources.list.d/system.sources 2&> /dev/null
-sudo locale-gen pt_BR.utf8 2&> /dev/null
-sudo update-locale LANG=pt_BR.utf8 2&> /dev/null
+sudo sed -i 's|http://us.|http://br.|' /etc/apt/sources.list.d/system.sources
+sudo locale-gen pt_BR.utf8
+sudo update-locale LANG=pt_BR.utf8
 
 # Configure new repository
 print_green "[Adding new Repositories]"
-sudo dpkg --add-architecture i386 -y 2&> /dev/null
-sudo add-apt-repository multiverse -y 2&> /dev/null
-sudo apt update 2&> /dev/null
+sudo dpkg --add-architecture i386 -y
+sudo add-apt-repository multiverse -y
+sudo apt update
 
 # Install some utilitaries apps by apt
 
 for package in "${utilitaries_app[@]}"; do
     if [[ -f /var/lib/dpkg/lock-frontend ]]; then
-        sudo rm /var/lib/dpkg/lock-frontend 2&> /dev/null
+        sudo rm /var/lib/dpkg/lock-frontend
+    
     fi
 
     if [[ -f /var/lib/dpkg/lock ]]; then
-        sudo rm /var/lib/dpkg/lock 2&> /dev/null
+        sudo rm /var/lib/dpkg/lock
+    
     fi
 
     if [[ -f /var/lib/apt/lists/lock ]]; then
-        sudo rm /var/lib/apt/lists/lock 2&> /dev/null
+        sudo rm /var/lib/apt/lists/lock
+    
     fi
 
     if [[ -f /var/cache/apt/archives/lock ]]; then
-        sudo rm /var/cache/apt/archives/lock 2&> /dev/nullcs
+        sudo rm /var/cache/apt/archives/lock
+    cs
     fi
 
     print_green "Install the package: ${package}"
@@ -180,21 +174,23 @@ while true; do
         break
     else
         print_green "Removendo pacotes órfãos..."
-        $ORPHANS | xargs sudo apt-get -y remove --purge 2&> /dev/null
+        $ORPHANS | xargs sudo apt-get -y remove --purge
+    
     fi
 done
 
 flatpak remove --unused
 for package in "${removing_list[@]}"; do
     print_green "Removing the bloat: ${package}..."
-    sudo apt purge "${package}" -y 2&> /dev/null
+    sudo apt purge "${package}" -y
+
 done
 
 # Enable some services
-sudo systemctl enable preload 2&> /dev/null
-sudo systemctl enable upower 2&> /dev/null
-sudo systemctl enable irqbalance.service 2&> /dev/null
-sudo systemctl enable systemd-oomd.service 2&> /dev/null
+sudo systemctl enable preload
+sudo systemctl enable upower
+sudo systemctl enable irqbalance.service
+sudo systemctl enable systemd-oomd.service
 
 # Replace the uninstall apps with flatpak apps
 print_green "[Install some flatpak apps]"
@@ -225,19 +221,19 @@ print_green "[Configure the swap to use agressive ram first]"
 sudo tee -a /etc/sysctl.d/99-sysctl.conf <<-EOF
 vm.swappiness=1
 vm.vfs_cache_pressure=50
-EOF 2&> /dev/null
+EOF
 
 sudo tee -a /etc/sysctl.d/99-sysctl.conf <<-EOF
 vm.dirty_background_bytes=16777216
 vm.dirty_bytes=50331648
-EOF 2&> /dev/null
+EOF
 
 print_green "[Configure agressive oomd to use cgroups]"
 sudo tee -a /etc/systemd/oomd.config <<-EOF
 [OOM]
 SwapUsedLimit=95%
 MemoryPressureLimit=70%
-EOF 2&> /dev/null
+EOF
 
 print_green "[Configure agressive Upower]"
 sudo tee -a /etc/Upower/Upower.conf <<-EOF
@@ -245,7 +241,7 @@ PercentageLow=10
 PercentageCritical=3
 PercentageAction=2
 CriticalPowerAction=HybridSleep"
-EOF 2&> /dev/null
+EOF
 
 print_green "[Improving Internet Screen]"
 sudo tee -a /etc/sysctl.conf <<-EOF
@@ -253,14 +249,14 @@ net.core.netdev_max_backlog=16384
 net.core.somaxconn=8192
 net.ipv4.tcp_fastopen=3
 libahci.ignore_sss=1
-EOF 2&> /dev/null
+EOF
 
 print_green "[Configure journalctl]"
 sudo tee -a /etc/systemd/journald.conf <<-EOF
 SystemMaxUse=100M
 SystemMaxFiles=5 # manter no máximo 5 arquivos
 MaxFileSec=1month # deletar logs velhos depois de 1 mês
-EOF 2&> /dev/null
+EOF
 
 if lspci | grep -i "VGA compatible controller: Intel" > /dev/null; then
     print_green "Intel i915 driver found."
