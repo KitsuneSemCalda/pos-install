@@ -110,10 +110,6 @@ print_green "[Update Certificates]"
 
 sudo update-ca-certificates
 
-print_green "[Adding graphics-drivers PPA]"
-
-sudo add-apt-repository ppa:oibaf/graphics-drivers -y
-
 flatpak remote-add --if-not-exists --no-gpg-verify flathub https://flathub.org/repo/flathub.flatpakrepo
 
 sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo flatpak update && sudo apt autoremove -y && sudo apt autoclean -y
@@ -136,6 +132,7 @@ sudo update-locale LANG=pt_BR.utf8
 print_green "[Adding new Repositories]"
 sudo dpkg --add-architecture i386
 sudo add-apt-repository multiverse -y
+sudo add-apt-repository ppa:oibaf/graphics-drivers -y
 sudo apt update
 
 # Install some utilitaries apps by apt
@@ -194,8 +191,8 @@ sudo systemctl enable systemd-oomd.service
 # Replace the uninstall apps with flatpak apps
 print_green "[Install some flatpak apps]"
 
+flatpak install flathub com.github.marhkb.Pods -y
 flatpak install flathub com.tomjwatson.Emote -y
-flatpak install flathub fr.free.Homebank -y
 flatpak install flathub fr.free.Homebank -y
 flatpak install flathub com.anydesk.Anydesk -y
 flatpak install flathub md.obsidian.Obsidian -y
@@ -210,7 +207,6 @@ flatpak install flathub com.microsoft.Edge -y
 flatpak install flathub com.google.Chrome -y
 
 add_flatpak_to_autostart io.github.trigg.discover_overlay
-
 
 # Optimizing linux
 print_green "[Configure Zen Kernel]"
