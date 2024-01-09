@@ -134,7 +134,7 @@ sudo update-locale LANG=pt_BR.utf8
 
 # Configure new repository
 print_green "[Adding new Repositories]"
-sudo dpkg --add-architecture i386 -y
+sudo dpkg --add-architecture i386
 sudo add-apt-repository multiverse -y
 sudo apt update
 
@@ -158,7 +158,6 @@ for package in "${utilitaries_app[@]}"; do
 
     if [[ -f /var/cache/apt/archives/lock ]]; then
         sudo rm /var/cache/apt/archives/lock
-    cs
     fi
 
     print_green "Install the package: ${package}"
