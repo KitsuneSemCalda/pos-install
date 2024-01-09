@@ -146,9 +146,7 @@ sudo update-locale LANG=pt_BR.utf8 2&> /dev/null
 print_green "[Adding new Repositories]"
 sudo dpkg --add-architecture i386 -y 2&> /dev/null
 sudo add-apt-repository multiverse -y 2&> /dev/null
-sudo apt update 2&>
-
-add_flatpak_to_autostart io.github.trigg.discover_overlay
+sudo apt update 2&> /dev/null
 
 # Install some utilitaries apps by apt
 
@@ -174,6 +172,24 @@ for package in "${utilitaries_app[@]}"; do
     dpkg --configure -a;
 done
 
+print_green "[Run Debloating]"
+while true; do
+    ORPHANS=$(sudo deborphan --guess-data)
+    if [ -z "$ORPHANS" ]; then
+        print_red "Não há mais pacotes órfãos para remover."
+        break
+    else
+        print_green "Removendo pacotes órfãos..."
+        $ORPHANS | xargs sudo apt-get -y remove --purge 2&> /dev/null
+    fi
+done
+
+flatpak remove --unused
+for package in "${removing_list[@]}"; do
+    print_green "Removing the bloat: ${package}..."
+    sudo apt purge "${package}" -y 2&> /dev/null
+done
+
 # Enable some services
 sudo systemctl enable preload 2&> /dev/null
 sudo systemctl enable upower 2&> /dev/null
@@ -197,6 +213,9 @@ flatpak install flathub com.discordapp.Discord -y
 flatpak install flathub io.github.trigg.discover_overlay -y
 flatpak install flathub com.microsoft.Edge -y
 flatpak install flathub com.google.Chrome -y
+
+add_flatpak_to_autostart io.github.trigg.discover_overlay
+
 
 # Optimizing linux
 print_green "[Configure Zen Kernel]"
@@ -244,34 +263,15 @@ MaxFileSec=1month # deletar logs velhos depois de 1 mês
 EOF 2&> /dev/null
 
 if lspci | grep -i "VGA compatible controller: Intel" > /dev/null; then
-
-print_green "Intel i915 driver found."
-sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
-options i915 modeset=0
-options i915 enable_fbc=1
-options i915 fastboot=1
-options i915 enable_guc=2
-EOF
-
+    print_green "Intel i915 driver found."
+    sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
+    options i915 modeset=0
+    options i915 enable_fbc=1
+    options i915 fastboot=1
+    options i915 enable_guc=2
+    EOF
 fi
 
-
-while true; do
-    ORPHANS=$(sudo deborphan --guess-data)
-    if [ -z "$ORPHANS" ]; then
-        print_red "Não há mais pacotes órfãos para remover."
-        break
-    else
-        print_green "Removendo pacotes órfãos..."
-        $ORPHANS | xargs sudo apt-get -y remove --purge
-    fi
-done
-
-flatpak remove --unused
-for package in "${removing_list[@]}"; do
-    print_green "Removing the bloat: ${package}..."
-    sudo apt purge "${package}" -y
-done
 
 print_green "[Configure Gnome Settings]"
 gsettings set org.gnome.SessionManager logout-prompt false
