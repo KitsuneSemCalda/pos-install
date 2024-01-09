@@ -263,16 +263,15 @@ MaxFileSec=1month # deletar logs velhos depois de 1 mês
 EOF 2&> /dev/null
 
 if lspci | grep -i "VGA compatible controller: Intel" > /dev/null; then
-
-print_green "Intel i915 driver found."
-sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
-options i915 modeset=0
-options i915 enable_fbc=1
-options i915 fastboot=1
-options i915 enable_guc=2
-EOF
-
+    print_green "Intel i915 driver found."
+    sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
+    options i915 modeset=0
+    options i915 enable_fbc=1
+    options i915 fastboot=1
+    options i915 enable_guc=2
+    EOF
 fi
+
 
 print_green "[Configure Gnome Settings]"
 gsettings set org.gnome.SessionManager logout-prompt false
