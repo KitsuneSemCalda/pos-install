@@ -36,6 +36,7 @@ utilitaries_app=(
     clang
     cargo
     tldr
+    nix-bin
     folder-color
     gnome-sushi
     keepassxc
