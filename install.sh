@@ -31,6 +31,8 @@ utilitaries_app=(
     zram-config
     build-essential
     nasm
+    cpufreqd
+    intel-media-va-driver-non-free
     clang
     cargo
     tldr
@@ -199,6 +201,7 @@ done
 # Enable some services
 sudo systemctl enable preload
 sudo systemctl enable upower
+sudo systemctl enable cpufreqd
 sudo systemctl enable thermald
 sudo systemctl enable irqbalance.service
 sudo systemctl enable systemd-oomd.service
