@@ -29,6 +29,10 @@ utilitaries_app=(
     deborphan
     numlockx
     zram-config
+    build-essential
+    nasm
+    clang
+    cargo
     tldr
     folder-color
     gnome-sushi
@@ -135,7 +139,17 @@ sudo add-apt-repository multiverse -y
 sudo add-apt-repository ppa:oibaf/graphics-drivers -y
 sudo apt update
 
-# Install some utilitaries apps by apt
+# Install some utilitaries
+
+curl -fsSL https://xmake.io/shget.text | bash
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
+
+tee -a ~/.bashrc <<-EOF
+. "$HOME/.asdf/asdf.sh"
+. "$HOME/.asdf/completions/asdf.bash"
+EOF
+
+source ~/.bashrc
 
 for package in "${utilitaries_app[@]}"; do
     if [[ -f /var/lib/dpkg/lock-frontend ]]; then
@@ -185,12 +199,14 @@ done
 # Enable some services
 sudo systemctl enable preload
 sudo systemctl enable upower
+sudo systemctl enable thermald
 sudo systemctl enable irqbalance.service
 sudo systemctl enable systemd-oomd.service
 
 # Replace the uninstall apps with flatpak apps
 print_green "[Install some flatpak apps]"
 
+flatpak install flathub org.gabmus.gfeeds -y
 flatpak install flathub com.github.marhkb.Pods -y
 flatpak install flathub com.tomjwatson.Emote -y
 flatpak install flathub fr.free.Homebank -y
@@ -254,15 +270,22 @@ MaxFileSec=1month # deletar logs velhos depois de 1 mês
 EOF
 
 if lspci | grep -i "VGA compatible controller: Intel" > /dev/null; then
-    print_green "Intel i915 driver found."
-    sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
-    options i915 modeset=0
-    options i915 enable_fbc=1
-    options i915 fastboot=1
-    options i915 enable_guc=2
-    EOF
+print_green "Intel i915 driver found."
+sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
+options i915 modeset=0
+options i915 enable_fbc=1
+options i915 fastboot=1
+options i915 enable_guc=2
+EOF
 fi
 
+asdf plugin-add golang
+asdf install golang latest
+asdf global golang latest
+
+asdf plugin-add nodejs
+asdf install nodejs latest
+asdf global nodejs latest
 
 print_green "[Configure Gnome Settings]"
 gsettings set org.gnome.SessionManager logout-prompt false
