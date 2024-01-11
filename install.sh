@@ -27,6 +27,7 @@ removing_list=(
 
 utilitaries_app=(
     deborphan
+    rng-tools5
     numlockx
     zram-config
     build-essential
@@ -209,6 +210,7 @@ done
 # Enable some services
 sudo systemctl enable preload
 sudo systemctl enable upower
+sudo systemctl enable rngd
 sudo systemctl enable cpufreqd
 sudo systemctl enable thermald
 sudo systemctl enable zram-config.service
