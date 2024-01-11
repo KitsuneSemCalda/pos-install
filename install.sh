@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Pop!OS Post-Install Script
 
 # Setting global var
@@ -155,7 +154,6 @@ sudo apt update
 # Install some utilitaries
 cd ~/.local/share/fonts && curl -fLO curl -fsSL https://raw.githubusercontent.com/ronniedroid/getnf/master/install.sh | bash
 
-
 tee -a ~/.bashrc <<-EOF
 . "$HOME/.asdf/asdf.sh"
 . "$HOME/.asdf/completions/asdf.bash"
@@ -163,30 +161,25 @@ EOF
 
 source ~/.bashrc
 
-for package in "${utilitaries_app[@]}"; do
-    if [[ -f /var/lib/dpkg/lock-frontend ]]; then
-        sudo rm /var/lib/dpkg/lock-frontend
-    
-    fi
+if [[ -f /var/lib/dpkg/lock-frontend ]]; then
+  sudo rm /var/lib/dpkg/lock-frontend
+fi
 
-    if [[ -f /var/lib/dpkg/lock ]]; then
-        sudo rm /var/lib/dpkg/lock
-    
-    fi
+if [[ -f /var/lib/dpkg/lock ]]; then
+  sudo rm /var/lib/dpkg/lock
+fi
 
-    if [[ -f /var/lib/apt/lists/lock ]]; then
-        sudo rm /var/lib/apt/lists/lock
-    
-    fi
+if [[ -f /var/lib/apt/lists/lock ]]; then
+  sudo rm /var/lib/apt/lists/lock
+fi
 
-    if [[ -f /var/cache/apt/archives/lock ]]; then
-        sudo rm /var/cache/apt/archives/lock
-    fi
+if [[ -f /var/cache/apt/archives/lock ]]; then
+  sudo rm /var/cache/apt/archives/lock
+fi
 
-    print_green "Install the package: ${package}"
-    sudo apt install "$package" -y --fix-broken;
-    dpkg --configure -a;
-done
+print_green "Install the package: ${package}"
+sudo apt install "${utilitaries_app[@]}" -y --install-recommends --fix-broken;
+dpkg --configure -a;
 
 print_green "[Run Debloating]"
 while true; do
@@ -202,11 +195,8 @@ while true; do
 done
 
 flatpak remove --unused
-for package in "${removing_list[@]}"; do
-    print_green "Removing the bloat: ${package}..."
-    sudo apt purge "${package}" -y
-
-done
+print_green "Removing the bloat: ${package}..."
+sudo apt purge "${removing_list[@]}" -y
 
 # Enable some services
 sudo systemctl enable preload
