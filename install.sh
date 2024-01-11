@@ -49,6 +49,15 @@ utilitaries_app=(
     irqbalance
     scrcpy
     systemd-oomd
+    libwebkit2gtk-4.0-dev
+    build-essential
+    curl
+    wget
+    file
+    libssl-dev 
+    libgtk-3-dev 
+    libayatana-appindicator3-dev
+    librsvg2-dev
 )
 
 # Setting auxiliar functions
@@ -144,14 +153,6 @@ sudo add-apt-repository ppa:oibaf/graphics-drivers -y
 sudo apt update
 
 # Install some utilitaries
-print_green "[Adding Xmake]"
-curl -fsSL https://xmake.io/shget.text | bash
-
-print_green "[Adding ASDF]"
-git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
-
-print_green "[Adding Nerd Font]"
-mkdir -p ~/.local/share/fonts
 cd ~/.local/share/fonts && curl -fLO curl -fsSL https://raw.githubusercontent.com/ronniedroid/getnf/master/install.sh | bash
 
 
@@ -293,20 +294,6 @@ options i915 enable_guc=2
 EOF
 fi
 
-print_green "[Configuring ASDF]"
-asdf plugin-add golang
-asdf install golang latest
-asdf global golang latest
-
-asdf plugin-add nodejs
-asdf install nodejs latest
-asdf global nodejs latest
-npm install -g yarn
-
-asdf plugin-add rust
-asdf install rust latest
-asdf global rust latest
-
 print_green "[Configure Gnome Settings]"
 gsettings set org.gnome.SessionManager logout-prompt false
 gsettings set org.gnome.desktop.interface enable-animations false
@@ -325,11 +312,6 @@ mkdir -p "$HOME/Documentos/💻 Projetos"
 mkdir -p "$HOME/Documentos/⌨️ Fanfics"
 mkdir -p "$HOME/💽 bin"
 mkdir -p "$HOME/Imagens/📸 Wallpapers"
-
-print_green "[Adding Lunarvim]"
-LV_BRANCH='release-1.3/neovim-0.9' bash <(curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.3/neovim-0.9/utils/installer/install.sh) -y
-cp ~/.local/share/lunarvim/lvim/utils/installer/config.example.lua ~/.config/lvim/config.lua
-lvim --headless +'lua require("lvim.utils").generate_settings()' +qa && sort -o lv-settings.lua{,} && mv lv-settings.lua ~/.config/lvim/
 
 print_green "All steps completed. Rebooting now.";
 sudo systemctl --now daemon-reload;
