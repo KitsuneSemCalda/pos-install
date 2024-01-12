@@ -48,10 +48,9 @@ chmod +x install.sh
 
 4.Follow the on-screen prompts and instructions
 
-> Caution :warning:
- This script performs various system configurations and installations. Review the script and understand the changes it makes before running it.
-
- Use it at your own risk, and make sure to have backups before making significant changes to your system.
+> [!WARNING]
+> This script performs various system configurations and installations. Review the script and understand the changes it makes before running it.
+> Use it at your own risk, and make sure to have backups before making significant changes to your system.
 
 ## Credits
 
