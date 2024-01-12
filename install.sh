@@ -32,6 +32,7 @@ utilitaries_app=(
     build-essential
     nasm
     cpufreqd
+    pipewire-jack
     intel-media-va-driver-non-free
     clang
     cargo
@@ -70,30 +71,25 @@ add_flatpak_to_autostart() {
         return
     fi
 
-    # Verifica se o aplicativo existe no Flathub
     if ! flatpak info "${app_id}" >/dev/null 2>&1; then
         print_red "Error: The application ${app_id} does not exist on Flathub."
         return
     fi
 
-    # Verifica se o diretório de inicialização automática existe, se não, cria
     if [[ ! -d ~/.config/autostart ]]; then
         print_red "The autostart directory does not exist. Creating it now."
         mkdir -p ~/.config/autostart
     fi
 
-    # Verifica se o aplicativo já foi adicionado à inicialização automática
     if [[ -f ~/.config/autostart/"${app_id}".desktop ]]; then
         print_red "Error: The application ${app_id} has already been added to autostart."
         return
     fi
 
-    # Obtém as informações do aplicativo
     local app_info=$(flatpak info --show-metadata "${app_id}")
     local app_name=$(echo "${app_info}" | grep -oP '(?<=name=).*')
     local app_comment=$(echo "${app_info}" | grep -oP '(?<=comment=).*')
 
-    # Cria um arquivo .desktop para o aplicativo no diretório de inicialização automática
     cat > ~/.config/autostart/"${app_id}".desktop <<EOF
 [Desktop Entry]
 Type=Application
@@ -143,6 +139,9 @@ print_green "[Setting Mirrors from Brazil]"
 sudo sed -i 's|http://us.|http://br.|' /etc/apt/sources.list.d/system.sources
 sudo locale-gen pt_BR.utf8
 sudo update-locale LANG=pt_BR.utf8
+
+# Configure autostart
+mkdir -p ~/.config/autostart
 
 # Configure new repository
 print_green "[Adding new Repositories]"
@@ -285,6 +284,7 @@ EOF
 fi
 
 print_green "[Configure Gnome Settings]"
+gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
 gsettings set org.gnome.SessionManager logout-prompt false
 gsettings set org.gnome.desktop.interface enable-animations false
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 900
@@ -296,6 +296,12 @@ gsettings set org.gnome.desktop.lockdown disable-lock-screen true
 gsettings set org.gnome.settings-daemon.plugins.xsettings overrides "[{'Gdk/WindowScalingFactor', <1>}]"
 gsettings set org.gnome.desktop.interface scaling-factor 1
 gsettings set org.gnome.desktop.interface text-scaling-factor 1
+
+print_green "[Configure Pipewire]"
+pactl load-module module-null-sink sink_name=my_sink
+pactl load-module module-loopback sink=my_sink latency_msec=1
+pactl load-module module-loopback sink=my_sink latency_msec=1
+
 
 print_green "[Configure personal Directories]"
 mkdir -p "$HOME/Documentos/💻 Projetos"
