@@ -18,43 +18,44 @@ This is a Bash script for post-installation tasks on Pop!_OS. It automates vario
 
 ## Fast Usage
 
-1.Using cURL to execute this script fastly
+1. Using cURL to execute this script fastly
 
 ```bash
 curl -s https://raw.githubusercontent.com/KitsuneSemCalda/pos-install/master/install.sh | sudo bash
 ```
 
-2.Follow the on-screen prompts and instructions.
+2. Follow the on-screen prompts and instructions.
 
 ## Usage
 
-1.Clone the repository or download the script.
+1. Clone the repository or download the script.
 
 ```bash
    git clone https://github.com/KitsuneSemCalda/pos-install
 ```
 
-2.Make the script executable.
+2. Make the script executable.
 
 ```bash
 chmod +x install.sh
 ```
 
-3.Run the script
+3. Run the script
 
 ```bash
 ./install.sh
 ```
 
-4.Follow the on-screen prompts and instructions
+4. Follow the on-screen prompts and instructions
 
 > [!WARNING]
-> This script performs various system configurations and installations. Review the script and understand the changes it makes before running it.
+> This script performs various system configurations and installations. 
+> Review the script and understand the changes it makes before running it.
 > Use it at your own risk, and make sure to have backups before making significant changes to your system.
 
-## Credits
-
-Feel free to customize and share this script. Contributions and feedback are welcome!
+> [!NOTE]
+> Feel free to customize and share this script. 
+> Contributions and feedback are welcome!
 
 ## License
 
