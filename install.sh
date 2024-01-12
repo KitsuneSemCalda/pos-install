@@ -298,10 +298,14 @@ gsettings set org.gnome.desktop.interface scaling-factor 1
 gsettings set org.gnome.desktop.interface text-scaling-factor 1
 
 print_green "[Configure Pipewire]"
-pactl load-module module-null-sink sink_name=my_sink
-pactl load-module module-loopback sink=my_sink latency_msec=1
-pactl load-module module-loopback sink=my_sink latency_msec=1
+#1 loopback to hw audio output for isolated game sound
+pactl load-module module-null-sink sink_name=MicPlusGame sink_properties=device.description="MicPlusGame"
+pactl load-module module-null-sink sink_name=GameOnly sink_properties=device.description="GameOnly"
 
+#2 loopbacks to "MicPlusGame"; 1 for microphone, 1 for game sound
+pactl load-module module-loopback source=GameOnly.monitor
+pactl load-module module-loopback source=MicPlusGame.monitor
+pactl load-module module-loopback source=GameOnly.monitor sink=MicPlusGame
 
 print_green "[Configure personal Directories]"
 mkdir -p "$HOME/Documentos/💻 Projetos"
