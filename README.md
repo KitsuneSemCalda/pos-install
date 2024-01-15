@@ -2,6 +2,9 @@
 
 This is a Bash script for post-installation tasks on Pop!_OS. It automates various configurations, installations, and optimizations to enhance the user experience.
 
+>[!CAUTION]
+This is a very personal script, if you want run in your pc probably need modification
+
 ## Features
 
 - System updates and certificate refresh.
@@ -49,12 +52,16 @@ chmod +x install.sh
 4. Follow the on-screen prompts and instructions
 
 > [!WARNING]
-> This script performs various system configurations and installations. 
+> This script performs various system configurations and installations.
+
+> [!WARNING]
 > Review the script and understand the changes it makes before running it.
+
+> [!WARNING]
 > Use it at your own risk, and make sure to have backups before making significant changes to your system.
 
 > [!NOTE]
-> Feel free to customize and share this script. 
+> Feel free to customize and share this script.
 > Contributions and feedback are welcome!
 
 ## License
