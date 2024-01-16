@@ -57,7 +57,7 @@ chmod +x install.sh
 > [!WARNING]
 > Review the script and understand the changes it makes before running it.
 
-> [!TIPS]
+> [!TIP]
 > Make sure to have backups before making significant changes to your system.
 
 > [!NOTE]
