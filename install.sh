@@ -222,6 +222,8 @@ flatpak install flathub com.discordapp.Discord -y
 flatpak install flathub io.github.trigg.discover_overlay -y
 flatpak install flathub com.microsoft.Edge -y
 flatpak install flathub com.google.Chrome -y
+flatpak install flathub rest.insomnia.Insomnia -y
+flatpak install flathub org.godotengine.Godot3 -y
 
 add_flatpak_to_autostart io.github.trigg.discover_overlay
 
