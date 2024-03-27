@@ -12,7 +12,6 @@ removing_list=(
     gnome-calculator
     gnome-font-viewer
     gnome-weather
-    gnome-terminal
     xbrlapi
     brltty
     simple-scan
@@ -21,7 +20,6 @@ removing_list=(
     *firefox*
     geary
     gedit
-    pop-shop
 )
 
 utilitaries_app=(
@@ -40,6 +38,9 @@ utilitaries_app=(
     folder-color
     gnome-sushi
     keepassxc
+    tilix
+    rustc
+    google-chrome-stable
     virtualbox
     virtualbox-guest-additions-iso
     virtualbox-guest-utils
@@ -102,7 +103,7 @@ Comment[en_US]=${app_comment}
 Comment=${app_comment}
 EOF
 
-    print_green "The Flatpak application ${app_id} has been added to start automatically!"
+  print_green "The Flatpak application ${app_id} has been added to start automatically!"
 }
 
 print_green() {
@@ -115,23 +116,28 @@ print_red() {
     echo -e "\033[0;31m${text}\033[0m"
 }
 
-# First update
 
+# Configure new repository
+print_green "[Adding new Repositories]"
+sudo dpkg --add-architecture i386
+sudo add-apt-repository multiverse -y
+sudo add-apt-repository ppa:oibaf/graphics-drivers -y
+
+# First update
 print_green "[Update Certificates]"
 
 sudo update-ca-certificates
 
 flatpak remote-add --if-not-exists --no-gpg-verify flathub https://flathub.org/repo/flathub.flatpakrepo
 
-sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo flatpak update && sudo apt autoremove -y && sudo apt autoclean -y
+sudo flatpak update && sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo flatpak update && sudo apt autoremove -y && sudo apt autoclean -y
 
 # Setting the hostname
 print_green "[Setting the hostname to ${HOSTNAME}]"
 hostnamectl set-hostname "${HOSTNAME}"
 
 # Configure the firewall
-print_green "[Setting the firewall]"
-sudo ufw enable
+sudo ufw disable
 
 # Configure mirror speed
 print_green "[Setting Mirrors from Brazil]"
@@ -140,14 +146,9 @@ sudo locale-gen pt_BR.utf8
 sudo update-locale LANG=pt_BR.utf8
 
 # Configure autostart
-mkdir -p ~/.config/autostart
-
-# Configure new repository
-print_green "[Adding new Repositories]"
-sudo dpkg --add-architecture i386
-sudo add-apt-repository multiverse -y
-sudo add-apt-repository ppa:oibaf/graphics-drivers -y
-sudo apt update
+if [ ! -d "$HOME/.config/autostart" ]; then
+  mkdir -p ~/.config/autostart
+end
 
 # Install some utilitaries
 cd ~/.local/share/fonts && curl -fLO curl -fsSL https://raw.githubusercontent.com/ronniedroid/getnf/master/install.sh | bash
@@ -179,23 +180,6 @@ print_green "Install the package: ${package}"
 sudo apt install "${utilitaries_app[@]}" -y --install-recommends --fix-broken;
 dpkg --configure -a;
 
-print_green "[Run Debloating]"
-while true; do
-    ORPHANS=$(sudo deborphan --guess-data)
-    if [ -z "$ORPHANS" ]; then
-        print_red "Não há mais pacotes órfãos para remover."
-        break
-    else
-        print_green "Removendo pacotes órfãos..."
-        $ORPHANS | xargs sudo apt-get -y remove --purge
-    
-    fi
-done
-
-flatpak remove --unused
-print_green "Removing the bloat: ${package}..."
-sudo apt purge "${removing_list[@]}" -y
-
 # Enable some services
 sudo systemctl enable preload
 sudo systemctl enable upower
@@ -221,15 +205,10 @@ flatpak install flathub in.srev.guiscrcpy -y
 flatpak install flathub com.discordapp.Discord -y
 flatpak install flathub io.github.trigg.discover_overlay -y
 flatpak install flathub com.microsoft.Edge -y
-flatpak install flathub com.google.Chrome -y
 flatpak install flathub rest.insomnia.Insomnia -y
 flatpak install flathub org.godotengine.Godot3 -y
 
 add_flatpak_to_autostart io.github.trigg.discover_overlay
-
-# Optimizing linux
-print_green "[Configure Zen Kernel]"
-curl -s 'https://liquorix.net/install-liquorix.sh' | sudo bash
 
 print_green "[Configure the swap to use agressive ram first]"
 sudo tee -a /etc/sysctl.d/99-sysctl.conf <<-EOF
@@ -274,13 +253,23 @@ EOF
 
 if lspci | grep -i "VGA compatible controller: Intel" > /dev/null; then
 print_green "Intel i915 driver found."
-sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
-options i915 modeset=0
-options i915 enable_fbc=1
-options i915 fastboot=1
-options i915 enable_guc=2
-EOF
-fi
+
+if [ -f "/etc/modprobe.d/i915.conf" ]; then 
+  sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
+  options i915 modeset=0
+  options i915 enable_fbc=1
+  options i915 fastboot=1
+  options i915 enable_guc=2
+  EOF
+else
+  sudo touch /etc/modprobe.d/i915.conf &&
+  sudo tee -a /etc/modprobe.d/i915.conf <<-EOF
+  options i915 modeset=0
+  options i915 enable_fbc=1
+  options i915 fastboot=1
+  options i915 enable_guc=2
+  EOF
+fi  
 
 print_green "[Configure Gnome Settings]"
 gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
@@ -296,21 +285,28 @@ gsettings set org.gnome.settings-daemon.plugins.xsettings overrides "[{'Gdk/Wind
 gsettings set org.gnome.desktop.interface scaling-factor 1
 gsettings set org.gnome.desktop.interface text-scaling-factor 1
 
-print_green "[Configure Pipewire]"
-#1 loopback to hw audio output for isolated game sound
-pactl load-module module-null-sink sink_name=MicPlusGame sink_properties=device.description="MicPlusGame"
-pactl load-module module-null-sink sink_name=GameOnly sink_properties=device.description="GameOnly"
-
-#2 loopbacks to "MicPlusGame"; 1 for microphone, 1 for game sound
-pactl load-module module-loopback source=GameOnly.monitor
-pactl load-module module-loopback source=MicPlusGame.monitor
-pactl load-module module-loopback source=GameOnly.monitor sink=MicPlusGame
-
 print_green "[Configure personal Directories]"
-mkdir -p "$HOME/Documentos/💻 Projetos"
-mkdir -p "$HOME/Documentos/⌨️ Fanfics"
-mkdir -p "$HOME/💽 bin"
-mkdir -p "$HOME/Imagens/📸 Wallpapers"
+mkdir -p "$HOME/Documentos/Projetos"
+mkdir -p "$HOME/Documentos/Fanfics"
+mkdir -p "$HOME/bin"
+mkdir -p "$HOME/Imagens/Wallpapers"
+
+print_green "[Run Debloating]"
+while true; do
+    ORPHANS=$(sudo deborphan --guess-data)
+    if [ -z "$ORPHANS" ]; then
+        print_red "Não há mais pacotes órfãos para remover."
+        break
+    else
+        print_green "Removendo pacotes órfãos..."
+        $ORPHANS | xargs sudo apt-get -y remove --purge
+    
+    fi
+done
+
+flatpak remove --unused
+print_green "Removing the bloat: ${package}..."
+sudo apt purge "${removing_list[@]}" -y
 
 print_green "All steps completed. Rebooting now.";
 sudo systemctl --now daemon-reload;
